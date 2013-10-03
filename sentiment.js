@@ -46,6 +46,7 @@ if (err) throw err;
                                 var wordRank = {}
                                 if (cleanedWord in ranks){
                                         wordRank[cleanedWord] = ranks[cleanedWord];
+                                        
                                         if (ranks[cleanedWord] > 0) {
                                            positiveWords.push(wordRank);
                                         }else if (ranks[cleanedWord] < 0){
@@ -53,7 +54,8 @@ if (err) throw err;
                                         }else{
                                            unclassified.push(wordRank);
                                         }
-                                        tweetSentiment +=  ranks[word];
+                                        
+                                        tweetSentiment += parseInt(ranks[word]);
                                 }else{
      			           wordRank[cleanedWord] = "na";
                                     unclassified.push(wordRank);
