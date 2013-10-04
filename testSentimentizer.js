@@ -1,40 +1,45 @@
-// var assert = require('assert');
-// var Sentimentizer = require('./sentimentizer').Sentimentizer;
+var assert = require('assert');
+var Sentimentizer = require('./sentimentizer').Sentimentizer;
 
-// var words = {
-// 	'great':4,
-// 	'bad':-3,
-// 	'super':5,
-// 	'negative':-1,
-// 	'foo':5
-// };
+var words = {
+	'great':4,
+	'bad':-3,
+	'super':5,
+	'negative':-1,
+	'foo':5
+};
 
-// var tweetMessage = "Great bad super negative bar";
 
-// var sent = new Sentimentizer(words, tweetMessage);
 
-// var positiveWords = sent.getPositiveWords();
+var tweetMessage = "Great bad super negative bar";
 
-// var negativeWords = sent.getNegativeWords();
+var sent = new Sentimentizer(words);
 
-// var sentiment = sent.getSentiment();
+describe('Sentimentizer', function(){
+	describe("getPositiveWords()", function(){
+		it('should return great, super, if passed the test string', function(){
+			var positiveWords = sent.getPositiveWords('Great bad super negative bar');
 
-// describe('Sentimentizer', function(){
-// 	describe("getPositiveWords()", function(){
-// 		it('should return great, super, if passed the test string', function(){
-// 			var positiveWords = sent.getPositiveWords();
+			assert.equal(4, positiveWords[0].great);
+		})
+	})
 
-// 			positiveWords.indexOf(0).should.equal('great');
-// 		})
-// 	})
-// })
+	describe("getSentiment()", function(){
+		it('should return 5 when passed: Great bad super negative bar', function(){
+			var sentiment = sent.getSentiment('Great bad super negative bar');
 
-var assert = require("assert")
-describe('Array', function(){
-  describe('#indexOf()', function(){
-    it('should return -1 when the value is not present', function(){
-      assert.equal(-1, [1,2,3].indexOf(5));
-      assert.equal(-1, [1,2,3].indexOf(0));
-    })
-  })
+			assert.equal(5, sentiment);
+		})
+	})
+
+	describe("getSentiment()", function(){
+		it('should return 5 when passed: EJ Manuel injury: Doug Marrone not upset about Manuel staying inbounds: In case you somehow missed it... http://t.co/O34XdzU7Ke #BILLS #NFL', function(){
+			var words = {'upset':-2, 'injury':-2, 'missed':-2};
+			var sent = new Sentimentizer(words);
+			var sentiment = sent.getSentiment('EJ Manuel Injury: Doug Marrone not Upset about Manuel staying inbounds: In case you somehow missed it... http://t.co/O34XdzU7Ke #BILLS #NFL');
+			assert.equal(-6, sentiment);
+		})
+	})
 })
+
+

@@ -1,10 +1,9 @@
-function Sentimentizer(wordRanks, tweet){
+function Sentimentizer(wordRanks){
 	"use strict";
 
 	var wordRanks = wordRanks;
-	var tweet = tweet;
 
-	this.getPositiveWords = function(){
+	this.getPositiveWords = function(tweet){
 		"use strict";
 		 var positiveWords = [];
 		 var words = tweet.split(' ');
@@ -14,7 +13,6 @@ function Sentimentizer(wordRanks, tweet){
 		 		if (wordRanks[cleanedWord] > 0){
 		 			var positiveWordRank = {};
 		 			positiveWordRank[cleanedWord] = wordRanks[cleanedWord];
-		 			console.log(positiveWordRank);
 		 			positiveWords.push(positiveWordRank);
 		 		}
 		 	}
@@ -22,7 +20,7 @@ function Sentimentizer(wordRanks, tweet){
 		 return positiveWords;
 	}
 
-	this.getNegativeWords = function(){
+	this.getNegativeWords = function(tweet){
 		"use strict";
 
 		var negativeWords = [];
@@ -41,7 +39,7 @@ function Sentimentizer(wordRanks, tweet){
 		return negativeWords;
 	}
 
-	this.getSentiment = function(){
+	this.getSentiment = function(tweet){
 		"use strict";
 
 		var negativeWords = [];
