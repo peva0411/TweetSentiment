@@ -24,9 +24,16 @@ MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
         var sentizer = new Sentimentizer(ranks);
 
          //loop to not pull all tweets at once
-        tweets.getTweets(50,0,function(err, items){
-            items.forEach(function(item){
-                    console.log("Calculating Tweet");
+         var count = 0;
+         var updateCount = 0;
+        tweets.getTweetsCursor(function(err, cursor){
+                cursor.each(function(err, item){
+                    count++;
+                    if (item == null){
+                        return;
+                    }
+
+                    console.log("Calculating Tweet: " + count);
                     var positiveWords = sentizer.getPositiveWords(item.text);
                     var negativeWords = sentizer.getNegativeWords(item.text);
                     var tweetSentiment = sentizer.getSentiment(item.text);
@@ -41,14 +48,13 @@ MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
                     tweets.updateTweet(item, function(err, result){
                         if (err) throw err;
 
-                        console.log("Updated Tweet");
-                        return;
+                        updateCount++;
+                        console.log("Updated Tweet: " + updateCount);
                     });
                 });
             });
     });
 });
 
-console.log("Completed");
 
 

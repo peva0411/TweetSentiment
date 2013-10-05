@@ -7,7 +7,7 @@ function TweetsDAO(db){
 
 	var tweets = db.collection("BillsTweets");
 
-	this.getTweets = function(num, skip, callback){
+	this.getTweets = function(num, skipgit , callback){
 		"use strict";
 
 		var skipInt = parseInt(skip);
@@ -16,6 +16,16 @@ function TweetsDAO(db){
 		tweets.find().sort('date', -1).skip(skipInt).limit(numInt).toArray(function(err, items){
 			if (err) return callback(err, null);
 			callback(err, items);
+		});
+	}
+
+	this.getTweetsCursor = function(callback){
+		"use strict";
+
+		tweets.find({}, function(err, resultCursor){
+			if (err) return callback(err, null);
+
+			return callback(null, resultCursor);
 		});
 	}
 
