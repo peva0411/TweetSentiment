@@ -3,46 +3,55 @@ function Sentimentizer(wordRanks){
 
 	var wordRanks = wordRanks;
 
+	var positiveSelector = function(score){
+		return score > 0;
+	}
+
+	var negativeSelector = function(score){
+		return score < 0;
+	}
+
 	this.getPositiveWords = function(tweet){
 		"use strict";
-		 var positiveWords = [];
-		 var words = tweet.split(' ');
-		 words.forEach(function(word){
-		 	var cleanedWord =  word.replace(/\W/g,'').toLowerCase();
-		 	if (wordRanks[cleanedWord]){
-		 		if (wordRanks[cleanedWord] > 0){
-		 			var positiveWordRank = {};
-		 			positiveWordRank[cleanedWord] = wordRanks[cleanedWord];
-		 			positiveWords.push(positiveWordRank);
-		 		}
-		 	}
-		 });
-		 return positiveWords;
+		 return getWords(tweet, positiveSelector);
 	}
 
 	this.getNegativeWords = function(tweet){
 		"use strict";
 
-		var negativeWords = [];
-		var words = tweet.split(' ');
+		return getWords(tweet, negativeSelector);
+	}
 
-		words.forEach(function(word){
-			var cleanedWord = word.replace(/\W/g,'').toLowerCase();
-			if (wordRanks[cleanedWord]){
-				if (wordRanks[cleanedWord] < 0){
-					var negativeWordRank = {};
-				    negativeWordRank[cleanedWord] = wordRanks[cleanedWord];
-				    negativeWords.push(negativeWordRank);
-				}
-			}
-		});
-		return negativeWords;
+	function cleanWord(word){
+		return word.replace(/\W/g,'').toLowerCase();
+	}
+
+	function splitTweet(tweet){
+		return tweet.split(' ');
+	}
+
+	var getWords = function(tweet, selector){
+		"use strict";
+		 var selectedWords = [];
+		 var words = splitTweet(tweet);
+
+		 words.forEach(function(word){
+		 	var cleanedWord = cleanWord(word);
+		 	if (wordRanks[cleanedWord]){
+		 		if (selector(wordRanks[cleanedWord])){
+		 			var wordRank = {};
+		 			wordRank[cleanedWord] = wordRanks[cleanedWord];
+		 			selectedWords.push(wordRank);
+		 		}
+		 	}
+		 });
+		 
+		 return selectedWords;
 	}
 
 	this.getSentiment = function(tweet){
 		"use strict";
 
-		var negativeWords = [];
 		var words = tweet.split(' ');
 		var sentiment = 0;
 		words.forEach(function(word){

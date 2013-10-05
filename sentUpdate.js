@@ -1,56 +1,54 @@
 var util = require('util'),
+WordRanksDAO = require('./wordRanks').WordRanksDAO,
+TweetsDAO = require('./tweets').TweetsDAO,
+Sentimentizer = require('./sentimentizer').Sentimentizer,
 MongoClient = require('mongodb').MongoClient;
 
 var ranks = {};
 
 MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
+    if (err) throw err;
 
+    console.log("Connect to DB");
 
-if (err) throw err;
+    var wordRanks = new WordRanksDAO(db);
+    var tweets = new TweetsDAO(db);
+    wordRanks.getWordRanks(function(err, items){
+         if (err) throw err; 
 
-        db.collection('WordRanks').find().toArray(function(err, items){
-                if (err) throw err;
-
-                items.forEach(function(item){
-                  ranks[item.Word] = item.Score;
-                });
+        items.forEach(function(item){
+            console.log(item.Word);
+            ranks[item.Word] = item.Score;
         });
 
+        var sentizer = new Sentimentizer(ranks);
 
-	db.collection('BillsTweets').find().toArray(function(err, items){
-		if (err) throw err;	
-		items.forEach(function(data){
-                        var replaceDate = new Date(data.created_at);
-                        //calc sentiment
-                        var positiveWords = [];
-                        var negativeWords = [];
-                        var unclassified = [];
-                        var tweetSentiment = 0;
-                        data.text.split(" ").forEach(function(word){
-   				var cleanedWord = word.replace(/\W/g,'').toLowerCase();
-//                              console.log(cleanedWord);
-                                var wordRank = {};
-                                if (cleanedWord in ranks){
-                                        wordRank[cleanedWord] = ranks[cleanedWord];
-                                        if (ranks[cleanedWord] > 0) {
-                                           positiveWords.push(wordRank);
-                                        }else if (ranks[cleanedWord] < 0){
-                                           negativeWords.push(wordRank);
-                                        }else{
-                                           unclassified.push(wordRank);
-                                        }
-                                        tweetSentiment +=  ranks[word];
-                                }else{
-                                   wordRank[cleanedWord] = "na";
-                                    unclassified.push(wordRank);
-                                }
-                        });
+         //loop to not pull all tweets at once
+        tweets.getTweets(50,0,function(err, items){
+            items.forEach(function(item){
+                    console.log("Calculating Tweet");
+                    var positiveWords = sentizer.getPositiveWords(item.text);
+                    var negativeWords = sentizer.getNegativeWords(item.text);
+                    var tweetSentiment = sentizer.getSentiment(item.text);
 
-                        db.collection('BillsTweets').update({'_id':data._id},{$set:{'sentiment':tweetSentiment, 'date':replaceDate, 'postiveWords':positiveWords, 'negativeWords':negativeWords, 'unclassifiedWords':unclassified}},function(err, updated){
-								if (err) throw err;
-								console.log(updated.sentiment);
-							});
-	});
+                    //add fields 
+                    item.sentiment = tweetSentiment;
+                    item.positiveWords = positiveWords;
+                    item.negativeWords = negativeWords;
+                    item.date = new Date(item.created_at);
+
+                    //update tweet
+                    tweets.updateTweet(item, function(err, result){
+                        if (err) throw err;
+
+                        console.log("Updated Tweet");
+                        return;
+                    });
+                });
+            });
+    });
 });
-});
+
+console.log("Completed");
+
 

@@ -1,6 +1,10 @@
 var util = require('util'),
 twitter = require('twitter'),
+WordRanksDAO = require('./WordRanks').WordRanksDAO,
+TweetsDAO = require('./TweetsDAO').TweetsDAO,
+Sentimentizer = require('./sentimentizer'),
 MongoClient = require('mongodb').MongoClient;
+
 
 var twit = new twitter({
         consumer_key: 'YGzVLUlyPqlIzcYH7vB7hw',
@@ -10,71 +14,54 @@ var twit = new twitter({
         //callback: 'http://google.com'
         });
 
+var trackQuery = {'track': ['Buffalo Bills',
+                            'Bills Football', 
+                            'Bills NFL',
+                            'Buffalo NFL',
+                            'Buffalo Football',
+                            'BuffaloBills']}
+
 var ranks = {};
 
 MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
+    if (err) throw err;
 
+    //get word ranks 
+    var wordRanks = new WordRanksDAO(db);
+    var tweets = new TweetsDAO(db);
+    wordRanks.getWordRanks(function(err, items){
+        if (err) throw err; 
 
-if (err) throw err;
-
-        db.collection('WordRanks').find().toArray(function(err, items){
-                if (err) throw err;
-
-                items.forEach(function(item){
-                  ranks[item.Word] = item.Score;
-                });
+        items.forEach(function(item){
+            ranks[item.Word] = item.Score;
         });
 
+        var sentizer = new Sentimentizer(ranks);
 
+    });
 
-        twit.stream("statuses/filter", {'track':['Buffalo Bills','Bills Football', 'Bills NFL','Buffalo NFL','Buffalo Football','BuffaloBills']}, function(stream){
-                stream.on('data',function(data){
-//                      console.log(JSON.stringify(data));
+    twit.stream("statuses/filter", {'track': trackQuery}, function(stream){
+            
+            stream.on('data',function(data){
+                    //calc sentiment
+                    var positiveWords = sentizer.getPositiveWords(data.text);
+                    var negativeWords = sentizer.getNegativeWords(data.text);
+                    var tweetSentiment = sentizer.getSentiment(data.text);
 
-        //              var twitObj = JSON.parse(util.inspect(data));
+                    //Add fields
+                    data.sentiment = tweetSentiment;
+                    data.positiveWords = positiveWords;
+                    data.negativeWords = negativeWords;
+                    data.date = new Date(data.created_at);
 
-                        data.date = new Date(data.created_at);
+                    //add tweet
+                    tweets.addTweet(data, function(err, result){
+                        if (err) throw err;
+                        console.log("Added Tweet: " + new Date());
+                    });
 
-                        //calc sentiment
-                        var positiveWords = [];
-                        var negativeWords = [];
-                        var unclassified = [];
-                        var tweetSentiment = 0;
-                        data.text.split(" ").forEach(function(word){
-                                var cleanedWord = word.replace(/\W/g,'').toLowerCase();
-//                              console.log(cleanedWord);
-                                var wordRank = {}
-                                if (cleanedWord in ranks){
-                                        wordRank[cleanedWord] = ranks[cleanedWord];
-                                        
-                                        if (ranks[cleanedWord] > 0) {
-                                           positiveWords.push(wordRank);
-                                        }else if (ranks[cleanedWord] < 0){
-                                           negativeWords.push(wordRank);
-                                        }else{
-                                           unclassified.push(wordRank);
-                                        }
-                                        
-                                        tweetSentiment += parseInt(ranks[word]);
-                                }else{
-     			           wordRank[cleanedWord] = "na";
-                                    unclassified.push(wordRank);
-                                }
-                        });
-
-                        data.sentiment = tweetSentiment;
-                        data.postiveWords = positiveWords;
-                        data.negativeWords = negativeWords;
-                        data.unclassifiedWords = unclassified;
-                        db.collection('BillsTweets').insert(data, function(err, inserted){
-                                if (err) throw err;
-                                var now = new Date();
-                                console.log("Added Tweet:  "+ now);
-                        });
-                });
-        });
-
-
+            });
+    });
 });
 
 
