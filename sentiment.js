@@ -1,8 +1,8 @@
 var util = require('util'),
 twitter = require('twitter'),
-WordRanksDAO = require('./WordRanks').WordRanksDAO,
-TweetsDAO = require('./TweetsDAO').TweetsDAO,
-Sentimentizer = require('./sentimentizer'),
+WordRanksDAO = require('./wordRanks').WordRanksDAO,
+TweetsDAO = require('./tweets').TweetsDAO,
+Sentimentizer = require('./sentimentizer').Sentimentizer,
 MongoClient = require('mongodb').MongoClient;
 
 
@@ -19,7 +19,7 @@ var trackQuery = {'track': ['Buffalo Bills',
                             'Bills NFL',
                             'Buffalo NFL',
                             'Buffalo Football',
-                            'BuffaloBills']}
+                            'BuffaloBills']};
 
 var ranks = {};
 
@@ -38,10 +38,9 @@ MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
 
         var sentizer = new Sentimentizer(ranks);
 
-    });
+        twit.stream("statuses/filter", trackQuery, function(stream){
+            console.log('listening for tweets');
 
-    twit.stream("statuses/filter", {'track': trackQuery}, function(stream){
-            
             stream.on('data',function(data){
                     //calc sentiment
                     var positiveWords = sentizer.getPositiveWords(data.text);
@@ -61,7 +60,11 @@ MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
                     });
 
             });
+        });
+
     });
+
+    
 });
 
 
