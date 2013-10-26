@@ -2,11 +2,16 @@ var util = require('util'),
 WordRanksDAO = require('./wordRanks').WordRanksDAO,
 TweetsDAO = require('./tweets').TweetsDAO,
 Sentimentizer = require('./sentimentizer').Sentimentizer,
-MongoClient = require('mongodb').MongoClient;
+MongoClient = require('mongodb').MongoClient,
+nconf = require('nconf');
 
 var ranks = {};
 
-MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
+nconf.file('settings.json');
+var connectionString = nconf.get("connectionString");
+
+
+MongoClient.connect(connectionString, function(err, db){
     if (err) throw err;
 
     console.log("Connect to DB");
