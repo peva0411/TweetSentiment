@@ -16,7 +16,7 @@ var accTokenSec = nconf.get('access_token_secret');
 
 var twit = new twitter({
         consumer_key: conKey,
-        consumer_secret: consumer_secret,
+        consumer_secret: consSec,
         access_token_key: accTokenKey,
         access_token_secret: accTokenSec
         //callback: 'http://google.com'
