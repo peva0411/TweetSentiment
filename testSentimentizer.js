@@ -20,7 +20,7 @@ describe('Sentimentizer', function(){
 		it('should return great, super, if passed the test string', function(){
 			var positiveWords = sent.getPositiveWords('Great bad super negative bar');
 
-			assert.equal(4, positiveWords[0].great);
+			assert.equal(4, positiveWords[0].score);
 		})
 	})
 
@@ -40,6 +40,16 @@ describe('Sentimentizer', function(){
 			assert.equal(-6, sentiment);
 		})
 	})
+
+	describe("getSentiment()", function(){
+		it("should return 7 when passed: RT @thurmanthomas: Very classy young man..RT @underwaterandy: @buffalobills @thurmanthomas I wish Drew Brees wasn't so damn classy.", function(){
+		var words = {'classy':3, 'wish':1};
+		var sent = new Sentimentizer(words);
+		var sentiment = sent.getSentiment('RT @thurmanthomas: Very classy young man..RT @underwaterandy: @buffalobills @thurmanthomas I wish Drew Brees wasn\'t so damn classy.');
+		assert.equal(7, sentiment);
+		})
+	})
+
 })
 
 

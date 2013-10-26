@@ -57,7 +57,7 @@ function Sentimentizer(wordRanks){
 		var sentiment = 0;
 		words.forEach(function(word){
 			
-			var cleanedWord = word.replace(/\W/g,'').toLowerCase();
+			var cleanedWord = cleanWord(word).toLowerCase();
 			if (wordRanks[cleanedWord]){
 					sentiment += wordRanks[cleanedWord];
 			}
