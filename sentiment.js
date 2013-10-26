@@ -23,7 +23,7 @@ var trackQuery = {'track': ['Buffalo Bills',
 
 var ranks = {};
 
-MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
+MongoClient.connect('mongodb://web:LukeSkywalker1@127.0.0.1:27017/twitter', function(err, db){
     if (err) throw err;
 
     //get word ranks 
