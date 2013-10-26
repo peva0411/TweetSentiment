@@ -1,0 +1,10 @@
+{
+	"name":"TweetSentiment",
+	"version":"0.0.1",
+	"description":"Tools for streaming tweets and assigning a sentiment score.",
+	"dependencies":{
+		"twitter":"~0.2.4",
+		"mongodb":"~1.3.9",
+		"nconf":"~0.6.7"
+	}
+}

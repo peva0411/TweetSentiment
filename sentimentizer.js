@@ -40,7 +40,8 @@ function Sentimentizer(wordRanks){
 		 	if (wordRanks[cleanedWord]){
 		 		if (selector(wordRanks[cleanedWord])){
 		 			var wordRank = {};
-		 			wordRank[cleanedWord] = wordRanks[cleanedWord];
+		 			wordRank.word = word;
+		 			wordRank.score = wordRanks[cleanedWord];
 		 			selectedWords.push(wordRank);
 		 		}
 		 	}

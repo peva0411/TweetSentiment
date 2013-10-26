@@ -3,14 +3,22 @@ twitter = require('twitter'),
 WordRanksDAO = require('./wordRanks').WordRanksDAO,
 TweetsDAO = require('./tweets').TweetsDAO,
 Sentimentizer = require('./sentimentizer').Sentimentizer,
-MongoClient = require('mongodb').MongoClient;
+MongoClient = require('mongodb').MongoClient,
+nconf = require('nconf');
 
+nconf.file('settings.json');
+
+var connectionString = nconf.get('connectionString');
+var conKey = nconf.get('consumer_key');
+var consSec = nconf.get('consumer_secret');
+var accTokenKey = nconf.get('access_token_key');
+var accTokenSec = nconf.get('access_token_secret'); 
 
 var twit = new twitter({
-        consumer_key: 'YGzVLUlyPqlIzcYH7vB7hw',
-        consumer_secret: 'nMKAMqDTzVUl4bOShLRs0GCAkaCVBPYgwlDp6PH6A',
-        access_token_key: '99572455-Sx0eXZADLcrSi39TIguB8MS9auoBBLmXrkPSbcCY',
-        access_token_secret: 'C4WTCEcuptiVN0wAIt7DqvklATz6VYtlWn4vwUAqmJI'
+        consumer_key: conKey,
+        consumer_secret: consumer_secret,
+        access_token_key: accTokenKey,
+        access_token_secret: accTokenSec
         //callback: 'http://google.com'
         });
 
@@ -23,7 +31,7 @@ var trackQuery = {'track': ['Buffalo Bills',
 
 var ranks = {};
 
-MongoClient.connect('mongodb://127.0.0.1:27017/twitter', function(err, db){
+MongoClient.connect(connectionString, function(err, db){
     if (err) throw err;
 
     //get word ranks 
